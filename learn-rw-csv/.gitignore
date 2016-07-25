@@ -1,2 +1,3 @@
 main.profile
-/src
+/src/*
+!/src/.gitkeep

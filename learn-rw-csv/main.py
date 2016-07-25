@@ -3,10 +3,12 @@
 # @first_date    20160724
 # @date          20160724
 '''main
-This is ten time faster than that without multiprocessing
 
-(main)       exec_time: 0.0770001411438
-(main_no_mp) exec_time: 1.09500002861
+Performance:
+    The is ten time faster than that without multiprocessing
+
+    (main)       exec_time: 0.0770001411438
+    (main_no_mp) exec_time: 1.09500002861
 '''
 from multiprocessing import Pool
 
