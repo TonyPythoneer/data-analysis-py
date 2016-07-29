@@ -1,0 +1,3 @@
+main.profile
+/src/*
+!/src/.gitkeep
