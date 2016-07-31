@@ -1,59 +1,59 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# @first_date    20160723
-# @date          20160723
+# @first_date    20160730
+# @date          20160730
 '''To get source and distribution directories of filename
 '''
 import os
-import logging
 
 import configs
 
 
-def _isdir(path):
-    '''Check the directories of the class variables exist or not'''
-    if not os.path.isdir(path):
-        logging.error('The `%s` doesn\'t exist', path)
-        raise IOError
-
-
-def _check_src_and_dict_dirs(src_dir, dist_dir):
-    '''Check the dir exists or not'''
-    _isdir(src_dir)
-    try:
-        _isdir(dist_dir)
-    except IOError:
-        print "Create `dist` directory"
-        os.mkdir(dist_dir)
-
-
 class DirectoryParser(object):
-    src_dir = configs.SRC_DIR
-    dist_dir = configs.DIST_DIR
+    _src_dir = configs.SRC_DIR
+    _dist_dir = configs.DIST_DIR
 
-    def __init__(self, extension = "csv"):
-        # Check the dir exists or not
-        _check_src_and_dict_dirs(self.src_dir, self.dist_dir)
+    def __init__(self, read_exts=("csv",), write_ext="csv"):
+        # Pre init
+        self._pre_init()
 
         # Init instance variables
-        self.filename_list = os.listdir(self.src_dir)
-        self.extension = extension
+        self.filename_list = os.listdir(self._src_dir)
+        self._init_read_exts(read_exts)
+        self._write_ext = write_ext
 
         # For process bar
         self.total_file_num = len(self.filename_list)
-        self.processed_file_num = 0
 
     def __iter__(self):
-        # Get path of every CSV file
-        for filename in self.filename_list:
-            self.processed_file_num += 1
-            _, ext = os.path.splitext(filename)
-            if ext.lower() == ('.' + self.extension).lower():
-                src_filename_path = os.path.join(self.src_dir, filename)
-                dist_filename_path = os.path.join(self.dist_dir, filename)
-                yield src_filename_path, dist_filename_path
+        '''Return src_filename_path, dist_filename_path'''
+        for fn in self.filename_list:
+            name, ext = os.path.splitext(fn)  # Get 'abc' and '.txt'
+            ext = ext[1:].lower()  # Exclude dot
+            if ext in self._read_exts:
+                dist_fn = name + '.' + self._write_ext
+                src_fn_path = os.path.join(self._src_dir, fn)
+                dist_fn_path = os.path.join(self._dist_dir, dist_fn)
+                yield src_fn_path, dist_fn_path
 
-    @property
-    def process_percentage(self):
-        '''The number ranges from 0 to 1'''
-        return self.processed_file_num / float(self.total_file_num)
+    def _pre_init(self):
+        '''Check the dir exists or not'''
+        # Verify src dir, otherwise rasing error
+        if not os.path.isdir(self._src_dir):
+            raise IOError('src folder not found')
+
+        # Verify dist dir, otherwise creating the directory
+        if not os.path.isdir(self._dist_dir):
+            print "Create `dist` directory"
+            os.mkdir(self._dist_dir)
+
+    def _init_read_exts(self, exts):
+        '''This property only accepts string, list and tuple of type'''
+        # Verify type of proerty
+        if isinstance(exts, str):
+            self._read_exts = (exts,)
+        elif isinstance(exts, (list, tuple)):
+            self._read_exts = exts
+        else:
+            # Raise error
+            raise TypeError('read_exts only accepts string, list and tuple')
